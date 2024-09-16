@@ -1,0 +1,69 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 1em;
+    text-align: center;
+}
+
+#status {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+#transcript {
+    height: 200px;
+    width: 80%;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    overflow-y: scroll;
+}
+
+#stopwatch {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+#accuracy,
+#latency {
+    font-weight: bold;
+    color: #333;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: blue;
+    color: white;
+    border: 2px solid blue;
+}
+
+.btn-danger {
+    background-color: red;
+    color: white;
+    border: 2px solid red;
+}
+
+.btn-info {
+    background-color: lightblue;
+    color: #333;
+    border: 2px solid lightblue;
+}
