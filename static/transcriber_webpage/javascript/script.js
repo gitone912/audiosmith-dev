@@ -1,4 +1,3 @@
-
 let mediaRecorder;
 let socket;
 let stopwatchInterval;
@@ -10,138 +9,195 @@ let totalLatency = 0;
 let transcriptCount = 0;
 
 const startStopwatch = () => {
-    countdownInterval = setInterval(() => {
-        remainingTime -= 1;
-        if (remainingTime >= 0) {
-            updateStopwatch();
-        } else {
-            closeConnection();
-        }
-    }, 1000);
+  countdownInterval = setInterval(() => {
+    remainingTime -= 1;
+    if (remainingTime >= 0) {
+      updateStopwatch();
+    } else {
+      closeConnection();
+    }
+  }, 1000);
 };
 
 const updateStopwatch = () => {
-    const minutes = Math.floor(remainingTime / 60);
-    const seconds = remainingTime % 60;
-    document.querySelector('#stopwatch').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime % 60;
+  document.querySelector("#stopwatch").textContent = `${minutes}:${
+    seconds < 10 ? "0" : ""
+  }${seconds}`;
 };
 
 const stopStopwatch = () => {
-    clearInterval(countdownInterval);
+  clearInterval(countdownInterval);
 };
 
 const resetStopwatch = () => {
-    remainingTime = 90;
-    updateStopwatch();
+  remainingTime = 90;
+  updateStopwatch();
 };
 
+// Function to make the POST request to Deepgram TTS API
+async function getDeepgramTTS(text) {
+  const url = "https://api.deepgram.com/v1/speak?model=aura-asteria-en";
+  const apiKey = "e2b10be16ef191908492b50e6deab126112a1d1f"; // Replace with your actual API key
 
-const askpermission = () => {
-    console.log("Yeah we started");
-
-    // Close the existing WebSocket connection if it exists
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.close();
-    }
-
-    // Stop the existing MediaRecorder if it exists
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-    }
-
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        if (!MediaRecorder.isTypeSupported('audio/webm'))
-            return alert('Browser not supported')
-
-        mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'audio/webm',
-        });
-
-        socket = new WebSocket(`ws://${window.location.host}/listen`);
-        console.log(window.location.host);
-
-
-        socket.onopen = () => {
-            document.querySelector('#status').textContent = 'Connected';
-            startStopwatch();
-
-            mediaRecorder.addEventListener('dataavailable', async (event) => {
-                if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
-                    socket.send(event.data);
-                }
-            });
-
-            mediaRecorder.start(250);
-
-            setTimeout(() => {
-                closeConnection();
-            }, 90000);  // 90 seconds
-        };
-
-        socket.onmessage = (message) => {
-            const received = JSON.parse(message.data);
-            console.log('Received Data:', received);
-            if (received) {
-                const accuracy = received['accuracy'];
-                const latency = received['latency'];
-
-                document.querySelector('#transcript').value += ' ' + received['transcript'];
-                document.querySelector('#bot').value += ' ' + received['groq_response'];
-                document.querySelector('#accuracy').textContent = accuracy.toFixed(2);
-                document.querySelector('#latency').textContent = latency.toFixed(2);
-
-                // Calculate and update average accuracy and latency
-                totalAccuracy += accuracy;
-                totalLatency += latency;
-                transcriptCount++;
-
-                const averageAccuracy = (totalAccuracy / transcriptCount).toFixed(2);
-                const averageLatency = (totalLatency / transcriptCount).toFixed(2);
-
-                document.querySelector('#averageAccuracy').textContent = averageAccuracy;
-                document.querySelector('#averageLatency').textContent = averageLatency;
-            }
-        };
-
-        socket.onclose = () => {
-            console.log({ event: 'onclose' });
-            stopStopwatch();
-        };
-
-        socket.onerror = (error) => {
-            console.log({ event: 'onerror', error });
-        };
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${apiKey}`,
+      },
+      body: JSON.stringify({ text: text }),
     });
+
+    if (response.ok) {
+      const blob = await response.blob(); // Get the audio content as a blob
+      return URL.createObjectURL(blob); // Create a temporary URL for the audio
+    } else {
+      console.error(
+        "Deepgram API request failed:",
+        response.status,
+        response.statusText
+      );
+      return null;
+    }
+  } catch (error) {
+    console.error("Error calling Deepgram API:", error);
+    return null;
+  }
+}
+
+// Function to play the audio
+function playAudio(audioUrl) {
+  const audio = new Audio(audioUrl); // Create an audio element with the URL
+  audio.play(); // Play the audio
+}
+const askpermission = () => {
+  console.log("Yeah we started");
+
+  // Close the existing WebSocket connection if it exists
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.close();
+  }
+
+  // Stop the existing MediaRecorder if it exists
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+  }
+
+  navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+    if (!MediaRecorder.isTypeSupported("audio/webm"))
+      return alert("Browser not supported");
+
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "audio/webm",
+    });
+
+    socket = new WebSocket(`ws://${window.location.host}/listen`);
+    console.log(window.location.host);
+
+    socket.onopen = () => {
+      document.querySelector("#status").textContent = "Connected";
+      startStopwatch();
+
+      mediaRecorder.addEventListener("dataavailable", async (event) => {
+        if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
+          socket.send(event.data);
+        }
+      });
+
+      mediaRecorder.start(250);
+
+      setTimeout(() => {
+        closeConnection();
+      }, 90000); // 90 seconds
+    };
+
+    socket.onmessage = async (message) => {
+      try {
+        const received = JSON.parse(message.data);
+        console.log("Received Data:", received);
+
+        if (received) {
+          const accuracy = received["accuracy"];
+          const latency = received["latency"];
+          const transcript = received["transcript"];
+          const groqResponse = received["groq_response"];
+
+          // Update the page with the received transcript and Groq response
+          document.querySelector("#transcript").value += " " + transcript;
+          if (groqResponse) {
+            document.querySelector("#bot").value += " " + groqResponse;
+
+            // Call Deepgram TTS and play the response
+            const audioUrl = await getDeepgramTTS(groqResponse);
+            if (audioUrl) {
+              playAudio(audioUrl);
+            }
+          }
+
+          // Update accuracy and latency values
+          document.querySelector("#accuracy").textContent = accuracy.toFixed(2);
+          document.querySelector("#latency").textContent = latency.toFixed(2);
+
+          // Calculate and update average accuracy and latency
+          totalAccuracy += accuracy;
+          totalLatency += latency;
+          transcriptCount++;
+
+          const averageAccuracy = (totalAccuracy / transcriptCount).toFixed(2);
+          const averageLatency = (totalLatency / transcriptCount).toFixed(2);
+
+          document.querySelector("#averageAccuracy").textContent =
+            averageAccuracy;
+          document.querySelector("#averageLatency").textContent =
+            averageLatency;
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    socket.onclose = () => {
+      console.log({ event: "onclose" });
+      stopStopwatch();
+    };
+
+    socket.onerror = (error) => {
+      console.log({ event: "onerror", error });
+    };
+  });
 };
 
 const clearTranscript = () => {
-    
-    document.querySelector('#transcript').value = '';
-    document.querySelector('#accuracy').textContent = '0';
-    document.querySelector('#latency').textContent = '0';
+  document.querySelector("#transcript").value = "";
+  document.querySelector("#accuracy").textContent = "0";
+  document.querySelector("#latency").textContent = "0";
 };
 
 const closeConnection = () => {
-    // Close the existing WebSocket connection if it exists
-    try {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.close();
-        }
-    } catch {
-        console.log("group_discard_Error");
+  // Close the existing WebSocket connection if it exists
+  try {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close();
     }
-    // Stop the existing MediaRecorder if it exists
-    try {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-    } catch (error) {
-        console.log("MediaREcording Error");
+  } catch {
+    console.log("group_discard_Error");
+  }
+  // Stop the existing MediaRecorder if it exists
+  try {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
     }
+  } catch (error) {
+    console.log("MediaREcording Error");
+  }
 
-    document.querySelector('#stopwatch').textContent = `${1}:${3}${0}`;
-    resetStopwatch();
-    document.querySelector('#status').textContent = 'Disconnected!! ,Press Record to transcribe again';
-    document.querySelector('#accuracy').textContent = '0';
-    document.querySelector('#latency').textContent = '0';
+  document.querySelector("#stopwatch").textContent = `${1}:${3}${0}`;
+  resetStopwatch();
+  document.querySelector("#status").textContent =
+    "Disconnected!! ,Press Record to transcribe again";
+  document.querySelector("#accuracy").textContent = "0";
+  document.querySelector("#latency").textContent = "0";
 };
