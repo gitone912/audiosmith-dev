@@ -1,23 +1,19 @@
 let mediaRecorder;
 let socket;
-let stopwatchInterval;
-let remainingTime = 90;
-let totalAccuracy = 0;
 let countdownInterval;
+let totalAccuracy = 0;
 let totalLatency = 0;
 let transcriptCount = 0;
-
 let currentAudio = null; // Track the currently playing audio
+let remainingTime = 90; // Initial time for the stopwatch (optional)
 
-// Start the stopwatch countdown
 const startStopwatch = () => {
   countdownInterval = setInterval(() => {
     remainingTime -= 1;
     if (remainingTime >= 0) {
       updateStopwatch();
-    } else {
-      closeConnection();
     }
+    // No auto close logic anymore
   }, 1000);
 };
 
@@ -35,7 +31,7 @@ const stopStopwatch = () => {
 };
 
 const resetStopwatch = () => {
-  remainingTime = 90;
+  remainingTime = 90; // Reset the stopwatch to 90 seconds
   updateStopwatch();
 };
 
@@ -125,9 +121,7 @@ const askpermission = () => {
 
       mediaRecorder.start(250);
 
-      setTimeout(() => {
-        closeConnection();
-      }, 90000); // 90 seconds
+      // Timeout removed, no auto closure after 90 seconds
     };
 
     socket.onmessage = async (message) => {
