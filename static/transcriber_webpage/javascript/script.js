@@ -5,9 +5,13 @@ let remainingTime = 90;
 let totalAccuracy = 0;
 let countdownInterval;
 let totalLatency = 0;
-
 let transcriptCount = 0;
 
+// Queue to handle audio playbacks
+let audioQueue = [];
+let currentAudio = null;
+
+// Start the stopwatch countdown
 const startStopwatch = () => {
   countdownInterval = setInterval(() => {
     remainingTime -= 1;
@@ -19,6 +23,7 @@ const startStopwatch = () => {
   }, 1000);
 };
 
+// Update the stopwatch display
 const updateStopwatch = () => {
   const minutes = Math.floor(remainingTime / 60);
   const seconds = remainingTime % 60;
@@ -68,11 +73,42 @@ async function getDeepgramTTS(text) {
   }
 }
 
-// Function to play the audio
-function playAudio(audioUrl) {
-  const audio = new Audio(audioUrl); // Create an audio element with the URL
-  audio.play(); // Play the audio
+// Function to manage audio playback
+function playAudioQueue(audioUrl) {
+  // Add the new audio URL to the queue
+  audioQueue.push(audioUrl);
+  
+  // If no audio is currently playing, play the next one in the queue
+  if (!currentAudio) {
+    playNextAudio();
+  }
 }
+
+function playNextAudio() {
+  // If there's audio in the queue
+  if (audioQueue.length > 0) {
+    const nextAudioUrl = audioQueue.shift(); // Get the next audio URL
+    currentAudio = new Audio(nextAudioUrl); // Create a new Audio object
+
+    currentAudio.play(); // Play the audio
+
+    // When the current audio finishes, play the next one
+    currentAudio.onended = () => {
+      currentAudio = null;
+      playNextAudio();
+    };
+
+    // If interrupted (a new audio is added), stop the current audio and play the new one
+    currentAudio.onplay = () => {
+      if (audioQueue.length > 0) {
+        currentAudio.pause(); // Stop the current audio
+        currentAudio = null;
+        playNextAudio(); // Play the next audio in the queue
+      }
+    };
+  }
+}
+
 const askpermission = () => {
   console.log("Yeah we started");
 
@@ -133,7 +169,7 @@ const askpermission = () => {
             // Call Deepgram TTS and play the response
             const audioUrl = await getDeepgramTTS(groqResponse);
             if (audioUrl) {
-              playAudio(audioUrl);
+              playAudioQueue(audioUrl); // Use the queue system for audio playback
             }
           }
 
