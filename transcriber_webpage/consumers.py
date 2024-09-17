@@ -29,7 +29,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
                         messages=[
                             {"role": "user", "content": transcript}
                         ],
-                        model="llama3-8b-8192",
+                        model="llama-3.1-8b-instant",
                     )
                     groq_response = chat_completion.choices[0].message.content
 

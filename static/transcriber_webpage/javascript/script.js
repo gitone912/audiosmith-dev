@@ -1,39 +1,9 @@
 let mediaRecorder;
 let socket;
-let countdownInterval;
 let totalAccuracy = 0;
 let totalLatency = 0;
 let transcriptCount = 0;
 let currentAudio = null; // Track the currently playing audio
-let remainingTime = 90; // Initial time for the stopwatch (optional)
-
-const startStopwatch = () => {
-  countdownInterval = setInterval(() => {
-    remainingTime -= 1;
-    if (remainingTime >= 0) {
-      updateStopwatch();
-    }
-    // No auto close logic anymore
-  }, 1000);
-};
-
-// Update the stopwatch display
-const updateStopwatch = () => {
-  const minutes = Math.floor(remainingTime / 60);
-  const seconds = remainingTime % 60;
-  document.querySelector("#stopwatch").textContent = `${minutes}:${
-    seconds < 10 ? "0" : ""
-  }${seconds}`;
-};
-
-const stopStopwatch = () => {
-  clearInterval(countdownInterval);
-};
-
-const resetStopwatch = () => {
-  remainingTime = 90; // Reset the stopwatch to 90 seconds
-  updateStopwatch();
-};
 
 // Function to make the POST request to Deepgram TTS API
 async function getDeepgramTTS(text) {
@@ -111,7 +81,6 @@ const askpermission = () => {
 
     socket.onopen = () => {
       document.querySelector("#status").textContent = "Connected";
-      startStopwatch();
 
       mediaRecorder.addEventListener("dataavailable", async (event) => {
         if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
@@ -120,8 +89,6 @@ const askpermission = () => {
       });
 
       mediaRecorder.start(250);
-
-      // Timeout removed, no auto closure after 90 seconds
     };
 
     socket.onmessage = async (message) => {
@@ -159,10 +126,8 @@ const askpermission = () => {
           const averageAccuracy = (totalAccuracy / transcriptCount).toFixed(2);
           const averageLatency = (totalLatency / transcriptCount).toFixed(2);
 
-          document.querySelector("#averageAccuracy").textContent =
-            averageAccuracy;
-          document.querySelector("#averageLatency").textContent =
-            averageLatency;
+          document.querySelector("#averageAccuracy").textContent = averageAccuracy;
+          document.querySelector("#averageLatency").textContent = averageLatency;
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -171,7 +136,6 @@ const askpermission = () => {
 
     socket.onclose = () => {
       console.log({ event: "onclose" });
-      stopStopwatch();
     };
 
     socket.onerror = (error) => {
@@ -201,11 +165,9 @@ const closeConnection = () => {
       mediaRecorder.stop();
     }
   } catch (error) {
-    console.log("MediaREcording Error");
+    console.log("MediaRecording Error");
   }
 
-  document.querySelector("#stopwatch").textContent = `${1}:${3}${0}`;
-  resetStopwatch();
   document.querySelector("#status").textContent =
     "Disconnected!! ,Press Record to transcribe again";
   document.querySelector("#accuracy").textContent = "0";

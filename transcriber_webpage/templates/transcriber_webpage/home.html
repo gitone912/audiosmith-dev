@@ -2,7 +2,7 @@
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <html>
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'transcriber_webpage\css\style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'transcriber_webpage/css/style.css' %}">
 
 <head>
     <title>RealTimeAudioTranscriber</title>
@@ -13,21 +13,18 @@
         <h1>Real-Time Audio Transcriber</h1>
     </header>
 
-
     <div class="btn-container" id="status">Connection Status... Press record to transcribe</div>
     <div class="btn-container">
         <textarea id="transcript" placeholder="Transcription will appear here"></textarea>
     </div>
     <div class="btn-container">
-        <textarea id="bot" placeholder="Transcription will appear here"></textarea>
+        <textarea id="bot" placeholder="Response will appear here"></textarea>
     </div>
-    <div class="btn-container" id="stopwatch">1:30</div>
     <div class="btn-container">
         <p>Accuracy: <span id="accuracy">0</span> | Latency: <span id="latency">0</span> seconds. |
             Average Accuracy: <span id="averageAccuracy">0</span> |
             Average Latency: <span id="averageLatency">0</span> seconds
         </p>
-
     </div>
 
     <div class="btn-container">
@@ -36,11 +33,7 @@
         <button class="btn btn-info" onclick="clearTranscript()"> Clear Text </button>
     </div>
 
-    
     {% load static %}
-    <script type="text/javascript" src="{% static 'transcriber_webpage\javascript\script.js' %}"></script>
-    
-
+    <script type="text/javascript" src="{% static 'transcriber_webpage/javascript/script.js' %}"></script>
 </body>
-
 </html>
