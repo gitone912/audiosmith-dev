@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Handlee&display=swap');
+.yellow-circle {
+    background-color: rgb(209, 179, 100); /* Yellow Circle */
+    color: white; /* White icon */
+}
+.yellow-text {
+    color: rgb(209, 179, 100); /* Yellow color for text */
+}
+.sound-wave-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: -20px; /* Adjust spacing between mic and waveform */
+}
+
+.sound-wave {
+    height: 37.5px; /* 25% smaller */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bar {
+    animation-name: wave-lg;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-direction: alternate;
+    background: #f32968; /* Bar color */
+    margin: 0 1.125px; /* 25% smaller margin */
+    height: 7.5px; /* 25% smaller */
+    width: 0.75px; /* 25% smaller width */
+}
+
+.bar:nth-child(-n + 7),
+.bar:nth-last-child(-n + 7) {
+    animation-name: wave-md;
+}
+
+.bar:nth-child(-n + 3),
+.bar:nth-last-child(-n + 3) {
+    animation-name: wave-sm;
+}
+
+/* Keyframes (25% smaller heights) */
+@keyframes wave-sm {
+    0% {
+        opacity: 0.35;
+        height: 7.5px; /* 10px -> 7.5px */
+    }
+    100% {
+        opacity: 1;
+        height: 18.75px; /* 25px -> 18.75px */
+    }
+}
+
+@keyframes wave-md {
+    0% {
+        opacity: 0.35;
+        height: 11.25px; /* 15px -> 11.25px */
+    }
+    100% {
+        opacity: 1;
+        height: 37.5px; /* 50px -> 37.5px */
+    }
+}
+
+@keyframes wave-lg {
+    0% {
+        opacity: 0.35;
+        height: 11.25px; /* 15px -> 11.25px */
+    }
+    100% {
+        opacity: 1;
+        height: 52.5px; /* 70px -> 52.5px */
+    }
+}
