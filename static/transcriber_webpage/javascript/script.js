@@ -3,13 +3,25 @@ let socket;
 let isConnected = false; // New flag to track the connection status
 let currentAudio = null; // Track the currently playing audio
 
+let bars; // Global reference for bars to be controlled
+
+// Initialize bars on window load
 window.addEventListener("load", () => {
-    const bars = document.querySelectorAll(".bar");
+    bars = document.querySelectorAll(".bar");
     bars.forEach(item => {
         item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+        item.style.animationPlayState = "paused"; // Pause animation initially
     });
 });
 
+// Function to control bar animation
+function toggleBarAnimation(play) {
+    if (!bars) return;
+
+    bars.forEach(item => {
+        item.style.animationPlayState = play ? "running" : "paused";
+    });
+}
 // Function to make the POST request to Deepgram TTS API
 async function getDeepgramTTS(text) {
     const url = "https://api.deepgram.com/v1/speak?model=aura-asteria-en";
@@ -43,16 +55,20 @@ function playAudio(audioUrl) {
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0; // Reset playback position
+        toggleBarAnimation(false); // Stop bars when audio is stopped
     }
 
     currentAudio = new Audio(audioUrl);
     currentAudio.play();
-  
+
+    // Start the bar animation when audio starts
+    toggleBarAnimation(true);
+
     currentAudio.onended = () => {
         currentAudio = null;
+        toggleBarAnimation(false); // Stop bar animation when audio ends
     };
 }
-
 // Function to toggle connection and icon
 function toggleConnection() {
     if (isConnected) {
