@@ -75,3 +75,39 @@
         height: 52.5px; /* 70px -> 52.5px */
     }
 }
+
+/* Add this to your CSS file */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.typing-cursor::after {
+    content: '|';
+    animation: blink 1s infinite;
+    margin-left: 2px;
+    opacity: 1;
+}
+
+
+/* Style for mobile devices */
+@media only screen and (max-width: 600px) {
+    #chat-container p {
+        font-size: 14px; /* Smaller font for mobile */
+    }
+
+    .text-lg {
+        font-size: 16px !important; /* Adjust large text size for mobile */
+    }
+
+    .italic {
+        font-size: 14px !important; /* Make italic text smaller */
+    }
+}
+
+
+#chat-container {
+    overflow-y: auto;
+    max-height: 400px; /* Or adjust as needed */
+}

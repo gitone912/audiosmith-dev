@@ -3,6 +3,13 @@ let socket;
 let isConnected = false; // New flag to track the connection status
 let currentAudio = null; // Track the currently playing audio
 
+window.addEventListener("load", () => {
+    const bars = document.querySelectorAll(".bar");
+    bars.forEach(item => {
+        item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+    });
+});
+
 // Function to make the POST request to Deepgram TTS API
 async function getDeepgramTTS(text) {
     const url = "https://api.deepgram.com/v1/speak?model=aura-asteria-en";
@@ -69,21 +76,39 @@ function updateMicIcon() {
 function updateChat(transcript, groqResponse) {
     const chatContainer = document.querySelector("#chat-container");
 
+    // Clear previous chat messages
     chatContainer.innerHTML = '';
 
-    const botMessage = document.createElement('p');
-    botMessage.classList.add('yellow-text', 'italic', 'text-lg');
-    botMessage.style.maxWidth = '600px';
-    botMessage.textContent = groqResponse;
-
+    // Create user message element (show immediately when the user starts speaking)
     const userMessage = document.createElement('p');
     userMessage.classList.add('text-gray-500', 'italic', 'mx-auto', 'text-lg');
     userMessage.style.maxWidth = '600px';
     userMessage.textContent = transcript;
 
-    chatContainer.appendChild(botMessage);
+    // Append user message
     chatContainer.appendChild(userMessage);
+    
+    // Create bot message element (empty at first, for typing effect)
+    const botMessage = document.createElement('p');
+    botMessage.classList.add('yellow-text', 'italic', 'text-lg');
+    botMessage.style.maxWidth = '600px';
+    chatContainer.appendChild(botMessage);
+    
+    // Delay bot response to simulate typing after user finishes speaking
+    setTimeout(() => {
+        let i = 0;
+        function typeText() {
+            if (i < groqResponse.length) {
+                botMessage.textContent += groqResponse.charAt(i);
+                i++;
+                setTimeout(typeText, 50); // Adjust typing speed here
+            }
+        }
+        typeText();
+    }, 50); // Optional delay before starting the bot's typing effect
 }
+
+
 
 const askpermission = () => {
     console.log("Starting connection");
@@ -128,11 +153,12 @@ const askpermission = () => {
                 const groqResponse = received["groq_response"];
 
                 if (groqResponse) {
-                    updateChat(transcript, groqResponse);
+                    
 
                     const audioUrl = await getDeepgramTTS(groqResponse);
                     if (audioUrl) {
                         playAudio(audioUrl);
+                        updateChat(transcript, groqResponse);
                     }
                 }
             } catch (error) {
