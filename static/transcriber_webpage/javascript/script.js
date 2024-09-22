@@ -18,7 +18,7 @@ window.addEventListener("load", () => {
             // All bars should be down (initial state, paused animation)
             item.style.transform = "translateY(100%)"; // Assuming 100% moves bars down (adjust based on your CSS)
             item.style.animationPlayState = "paused"; // Pause animation initially
-            item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+            item.style.animationDuration = `${Math.random() * (0.1 - 0.1) + 0.1}s`; // Random animation duration
         });
     } else {
         // Regular behavior on subsequent reloads
@@ -39,7 +39,7 @@ function toggleBarAnimation(play) {
 }
 // Function to make the POST request to Deepgram TTS API
 async function getDeepgramTTS(text) {
-    const url = "https://api.deepgram.com/v1/speak?model=aura-asteria-en";
+    const url = "https://api.deepgram.com/v1/speak?model=aura-stella-en";
     const apiKey = "e2b10be16ef191908492b50e6deab126112a1d1f"; // Replace with your actual API key
 
     try {
@@ -164,7 +164,7 @@ const askpermission = () => {
         socket = new WebSocket(`ws://${window.location.host}/listen`);
 
         socket.onopen = async () => {
-            document.querySelector("#status").textContent = "Connected";
+            document.querySelector("#status").textContent = "Connecting...";
             isConnected = true;
             updateMicIcon();
         
@@ -180,6 +180,7 @@ const askpermission = () => {
                 const greetingAudioUrl = await getDeepgramTTS(initialGreeting);
                 if (greetingAudioUrl) {
                     playAudio(greetingAudioUrl);
+                    document.querySelector("#status").textContent = "Connected!! Click to disconnect";
                 }
             }
         

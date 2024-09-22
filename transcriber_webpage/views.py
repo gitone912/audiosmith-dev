@@ -15,9 +15,9 @@ load_dotenv()
 
 def index(request):
     if request.user.is_authenticated:
-        greeting = f"Welcome, {request.user.username}! Connection is now established."
+        greeting = f"Hi {request.user.username}. welcome to audiosmith, I am Stella, your personal journalist. I am here to cover and write about the daily life events that make you, who you are. So are you ready to start?"
     else:
-        greeting = "Welcome! Connection is now established."
+        greeting = "Hi welcome to audiosmith, I am Stella, your personal journalist. I am here to cover and write about the daily life events that make you, Who you are. So are you ready to start?"
     
     context = {'greeting': greeting}
     return render(request, 'transcriber_webpage/home.html', context)
