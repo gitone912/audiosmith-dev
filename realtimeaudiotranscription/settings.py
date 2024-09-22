@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'transcriber_webpage',
+    'social_django',
 ]
 ASGI_APPLICATION = 'realtimeaudiotranscription.asgi.application' 
 MIDDLEWARE = [

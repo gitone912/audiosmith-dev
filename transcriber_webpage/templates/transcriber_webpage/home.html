@@ -63,7 +63,7 @@
                     <div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
                         A
                     </div>
-                    <div class="text-lg font-semibold">AKASH VERMA</div>
+                    <div class="text-lg font-semibold">{{ username }}</div> 
                 </div>
                 <button onclick="toggleDropdown()" class="focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
@@ -73,48 +73,34 @@
 
                 <!-- Profile Dropdown -->
                 <div id="profileDropdown" class="absolute top-16 right-0 w-64 bg-white rounded-md shadow-lg p-4 hidden">
-                    <div class="text-sm text-gray-600 mb-3">bsoni9122505056@gmail.com</div>
+                    <div class="text-sm text-gray-600 mb-3">{{ email }}</div>
                     <div class="flex items-center mb-4">
                         <div class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
-                            A
+                            {{ username|slice:":1" }}  <!-- First letter of the username -->
                         </div>
                         <div class="ml-3">
-                            <div class="font-semibold">AKASH VERMA</div>
-                            <div class="text-sm text-gray-500">Lifetime: Entries: 18</div>
+                            <div class="font-semibold">{{ username }}</div> 
                         </div>
                     </div>
                     <ul class="space-y-2">
                         <li>
-                            <a href="#" class="flex items-center space-x-2 text-gray-700 hover:text-black">
+                            <a href="{%url "users-profile" %}" class="flex items-center space-x-2 text-gray-700 hover:text-black">
                                 <span class="w-5 h-5 inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3.75h18m-9 0v16.5m6-16.5v10.5M9 3.75v10.5M6 14.25v6M18 14.25v6" />
-                                    </svg>
+                                    <i class="fas fa-user"></i>
                                 </span>
-                                <span>Purchase entry</span>
+                                <span>Profile</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center space-x-2 text-gray-700 hover:text-black">
+                            <a href="{% url "logout" %}" class="flex items-center space-x-2 text-gray-700 hover:text-black">
                                 <span class="w-5 h-5 inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 10.5l-9-9-9 9M3 18.75V21h3M21 21v-2.25h-3" />
-                                    </svg>
-                                </span>
-                                <span>Suggest & Explore Features</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="flex items-center space-x-2 text-gray-700 hover:text-black">
-                                <span class="w-5 h-5 inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25M12 9V5.25M18 9V5.25M15.75 18.75v-3.75M12 18.75v-3.75M18 18.75v-3.75M3 12h7.5M9.75 15.75l4.5-3.75-4.5-3.75" />
-                                    </svg>
+                                    <i class="fas fa-sign-out-alt"></i>
                                 </span>
                                 <span>Log out</span>
                             </a>
                         </li>
                     </ul>
+                    
                 </div>
             </div>
 
@@ -129,7 +115,7 @@
                     </li>
                     <li>
                         <a href="#" class="flex items-center justify-between text-gray-700 font-small rounded-md hover:bg-gray-200 px-4">
-                            <span><i class="fas fa-book text-sm mr-2"></i>All Entries</span>
+                            <span><i class="fas fa-book text-sm mr-2"></i>All Journal Entries</span>
                             <span class="text-sm text-gray-500">></span>
                         </a>
                     </li>
@@ -140,7 +126,10 @@
         <!-- Main content -->
         <main class="flex-grow p-8 flex flex-col items-center">
             <!-- Status -->
-            <div class="btn-container mb-8" id="status"> Click the Mic Icon to Start ..</div>
+            <div class="bg-white-100 border border-black-400 text-black-700 px-4 py-3 rounded-lg shadow-md flex items-center space-x-2 mb-8" role="alert" id="status">
+                <span>Click the Mic Icon to Start ..</span>
+            </div>
+            
     
             <!-- Microphone Icon inside Yellow Circle (aligned towards the top) -->
             <div class="sound-wave-container">
@@ -157,9 +146,14 @@
     
             <!-- Increased space between mic icon and the button -->
             <!-- Single Button -->
-            <button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8" onclick="askpermission()">
-                Dialogue with AI
-            </button>
+            <div class="text-center">
+                <button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8" onclick="askpermission()">
+                    Dialogue with AI
+                </button>
+                
+                <p id="buttonsup" class="mt-2 text-gray-600 text-sm">Click to connect</p>
+            </div>
+            
     
             <div class="text-center space-y-4 mt-12 p-10">
                 <!-- Container for new chats -->

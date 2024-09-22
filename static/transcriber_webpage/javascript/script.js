@@ -4,29 +4,14 @@ let isConnected = false; // New flag to track the connection status
 let currentAudio = null; // Track the currently playing audio
 
 let bars; // Global reference for bars to be controlled
-
+// `${Math.random() * (0.1 - 0.1) + 0.1}s`;
 // Initialize bars on window load
 window.addEventListener("load", () => {
-    const bars = document.querySelectorAll(".bar");
-    const firstTime = sessionStorage.getItem("firstTimeLoad") === null; // Check if it's the first load
-
-    if (firstTime) {
-        // Set sessionStorage so that this block doesn't run again until the tab is closed
-        sessionStorage.setItem("firstTimeLoad", "true");
-
-        bars.forEach(item => {
-            // All bars should be down (initial state, paused animation)
-            item.style.transform = "translateY(100%)"; // Assuming 100% moves bars down (adjust based on your CSS)
-            item.style.animationPlayState = "paused"; // Pause animation initially
-            item.style.animationDuration = `${Math.random() * (0.1 - 0.1) + 0.1}s`; // Random animation duration
-        });
-    } else {
-        // Regular behavior on subsequent reloads
-        bars.forEach(item => {
-            item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
-            item.style.animationPlayState = "paused"; // Pause animation initially
-        });
-    }
+    bars = document.querySelectorAll(".bar");
+    bars.forEach(item => {
+        item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+        item.style.animationPlayState = "paused"; // Pause animation initially
+    });
 });
 
 // Function to control bar animation
@@ -181,6 +166,7 @@ const askpermission = () => {
                 if (greetingAudioUrl) {
                     playAudio(greetingAudioUrl);
                     document.querySelector("#status").textContent = "Connected!! Click to disconnect";
+                    document.querySelector("#buttonsup").textContent = "Connected!! Click to disconnect";
                 }
             }
         
@@ -238,6 +224,7 @@ const closeConnection = () => {
     }
 
     document.querySelector("#status").textContent = "Disconnected!! Click to connect again";
+    document.querySelector("#buttonsup").textContent = "Click to connect";
     isConnected = false;
     updateMicIcon();
 };

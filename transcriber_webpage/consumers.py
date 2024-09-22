@@ -9,7 +9,7 @@ from groq import Groq
 from django.contrib.auth import get_user_model
 from .models import ChatHistory, Profile
 from asgiref.sync import sync_to_async
-import asyncio  # Add asyncio for time-based scheduling
+import asyncio  # Import asyncio for the timing feature
 
 load_dotenv()
 
@@ -19,34 +19,36 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
     groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     start_time = 0
     previous_chats = []  # To store the full chat history during the session
-    transcript_buffer = ""  # Buffer to hold intermediate transcripts
+    transcript_buffer = ""  # Buffer to hold concatenated transcripts
     last_transcript_time = 0  # Time when the last transcript was received
 
     async def get_transcript(self, data: Dict) -> None:
+        """Receive transcripts from Deepgram and append to buffer."""
         if "channel" in data:
             transcript = data["channel"]["alternatives"][0]["transcript"]
-            accuracy = data["channel"]["alternatives"][0]["confidence"]
-            audio_time = data["start"] + data["duration"]
 
             if transcript:
-                self.transcript_buffer += transcript + " "  # Append transcript to buffer
-                self.last_transcript_time = time.time()  # Update last transcript time
+                self.transcript_buffer += transcript + " "  # Append the received transcript to the buffer
+                self.last_transcript_time = time.time()  # Update last transcript time to current time
 
     async def check_for_transcripts(self):
+        """Continuously checks every 2 seconds if transcripts are still being received."""
         while True:
-            await asyncio.sleep(2)  # Wait for 2 seconds between checks
+            await asyncio.sleep(3)  # Wait for 2 seconds before checking again
             current_time = time.time()
-            # Check if 2 seconds have passed since the last transcript
-            if self.transcript_buffer and current_time - self.last_transcript_time >= 2:
-                await self.send_final_transcript()  # Send final transcript to Groq
-                self.transcript_buffer = ""  # Reset the buffer
+            
+            # If more than 2 seconds have passed since the last transcript, send the final transcript
+            if self.transcript_buffer and current_time - self.last_transcript_time >= 3:
+                await self.send_final_transcript()
+                self.transcript_buffer = ""  # Reset the buffer after sending the transcript
 
     async def send_final_transcript(self):
-        """Sends the final transcript to Groq and gets the response."""
-        if not self.transcript_buffer.strip():  # If no transcript is present, return
+        """Send the final concatenated transcript to Groq after a 2-second pause."""
+        if not self.transcript_buffer.strip():  # If the buffer is empty, return
             return
 
-        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible . Initiate the conversation fist. Don\\'t ask more than 1 question at a time. Don\\'t make much assumptions . \nread previous chats and respond according to that. Let the user speak if his words are not completed according to the previous chats.\n. You must add \\'...' symbol every 5 to 10 words at natural pauses where your response can be split for text to speech.\n\n\n\nPREVIOUS CHATS\n:\n{json.dumps(self.previous_chats, indent=2)}\n\n"
+        # Prepare the system prompt using the previous chat history
+        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible. Initiate the conversation first. Don't ask more than 1 question at a time. Don't make many assumptions. Read previous chats and respond accordingly. Let the user speak if their words are not completed according to the previous chats. You must add '...' symbol every 5 to 10 words at natural pauses where your response can be split for text to speech.\n\n\nPREVIOUS CHATS:\n{json.dumps(self.previous_chats, indent=2)}\n\n"
 
         try:
             chat_completion = self.groq_client.chat.completions.create(
@@ -61,20 +63,21 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             )
             groq_response = chat_completion.choices[0].message.content
 
-            # Append current chat to previous chats
+            # Append the current chat to the previous chat history
             self.previous_chats.append({
                 "user": self.transcript_buffer.strip(),
                 "groq": groq_response
             })
 
+            # Prepare response data
             response_data = {
                 "transcript": self.transcript_buffer.strip(),
                 "groq_response": groq_response,
-                "accuracy": None,  # Accuracy is not tracked over multiple transcripts
+                "accuracy": None,  # We are not tracking accuracy for multiple transcripts
                 "latency": time.time() - self.last_transcript_time,
             }
             response_json = json.dumps(response_data)
-            await self.send(response_json)
+            await self.send(response_json)  # Send the final response over WebSocket
 
         except Exception as e:
             print(f"Error in Groq API request: {e}")
@@ -86,12 +89,13 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             # Save the entire conversation as JSON in the database
             await sync_to_async(ChatHistory.objects.create)(
                 user=user,
-                transcript=json.dumps(self.previous_chats)  # Saving the full conversation as JSON
+                transcript=json.dumps(self.previous_chats)  # Save the full conversation as JSON
             )
         else:
             print("User is not authenticated. Cannot save chat history.")
 
     async def connect_to_deepgram(self):
+        """Connect to the Deepgram API for live transcription."""
         try:
             self.start_time = time.time()
             connection_start = time.time()
@@ -115,15 +119,17 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             raise Exception(f"Could not open socket: {e}")
 
     async def connect(self):
+        """WebSocket connection established."""
         await self.connect_to_deepgram()
         await self.accept()
-        # Start checking for transcripts every 2 seconds
+        # Start a background task to check for transcripts every 2 seconds
         asyncio.create_task(self.check_for_transcripts())
 
     async def disconnect(self, close_code):
-        # Save the entire chat history when the connection is closed
+        """When WebSocket connection is closed, save the chat history."""
         await self.save_chat_history()
         await self.close()
 
     async def receive(self, bytes_data):
+        """Send audio data to Deepgram for transcription."""
         self.socket.send(bytes_data)
