@@ -170,6 +170,9 @@
         </main>
     </div>
     {% load static %}
+    <script>
+        const initialGreeting = "{{ greeting }}";  // Pass greeting from Django context to JS
+    </script>
     <script type="text/javascript" src="{% static 'transcriber_webpage/javascript/script.js' %}"></script>
 </body>
 </html>

@@ -7,11 +7,26 @@ let bars; // Global reference for bars to be controlled
 
 // Initialize bars on window load
 window.addEventListener("load", () => {
-    bars = document.querySelectorAll(".bar");
-    bars.forEach(item => {
-        item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
-        item.style.animationPlayState = "paused"; // Pause animation initially
-    });
+    const bars = document.querySelectorAll(".bar");
+    const firstTime = sessionStorage.getItem("firstTimeLoad") === null; // Check if it's the first load
+
+    if (firstTime) {
+        // Set sessionStorage so that this block doesn't run again until the tab is closed
+        sessionStorage.setItem("firstTimeLoad", "true");
+
+        bars.forEach(item => {
+            // All bars should be down (initial state, paused animation)
+            item.style.transform = "translateY(100%)"; // Assuming 100% moves bars down (adjust based on your CSS)
+            item.style.animationPlayState = "paused"; // Pause animation initially
+            item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+        });
+    } else {
+        // Regular behavior on subsequent reloads
+        bars.forEach(item => {
+            item.style.animationDuration = `${Math.random() * (0.7 - 0.2) + 0.2}s`; // Random animation duration
+            item.style.animationPlayState = "paused"; // Pause animation initially
+        });
+    }
 });
 
 // Function to control bar animation
@@ -148,19 +163,29 @@ const askpermission = () => {
 
         socket = new WebSocket(`ws://${window.location.host}/listen`);
 
-        socket.onopen = () => {
+        socket.onopen = async () => {
             document.querySelector("#status").textContent = "Connected";
             isConnected = true;
             updateMicIcon();
+        
+            // Play the greeting message once the connection is established
 
+        
             mediaRecorder.addEventListener("dataavailable", async (event) => {
                 if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
                     socket.send(event.data);
                 }
             });
-
+            if (initialGreeting) {
+                const greetingAudioUrl = await getDeepgramTTS(initialGreeting);
+                if (greetingAudioUrl) {
+                    playAudio(greetingAudioUrl);
+                }
+            }
+        
             mediaRecorder.start(250);
         };
+        
 
         socket.onmessage = async (message) => {
             try {

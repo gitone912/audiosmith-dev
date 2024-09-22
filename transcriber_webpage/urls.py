@@ -3,12 +3,16 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
+from .views import RegisterView, home , profile
 
 
 urlpatterns = [
     path("", views.index, name="index"),
     path("test", views.test, name="test"),
-    path("api_key",views.get_api_key,name='apikey')
+    path("api_key",views.get_api_key,name='apikey'),
+    path('users', home, name='users-home'),
+    path('register/', RegisterView.as_view(), name='users-register'),
+    path('profile/', profile, name='users-profile'),
 
 ]
 
