@@ -28,19 +28,43 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             transcript = data["channel"]["alternatives"][0]["transcript"]
 
             if transcript:
-                self.transcript_buffer += transcript + " "  # Append the received transcript to the buffer
-                self.last_transcript_time = time.time()  # Update last transcript time to current time
+                self.transcript_buffer += (
+                    transcript + " "
+                )  # Append the received transcript to the buffer
+                self.last_transcript_time = (
+                    time.time()
+                )  # Update last transcript time to current time
 
     async def check_for_transcripts(self):
         """Continuously checks every 2 seconds if transcripts are still being received."""
         while True:
-            await asyncio.sleep(3)  # Wait for 2 seconds before checking again
+            await asyncio.sleep(2)  # Wait for 2 seconds before checking again
             current_time = time.time()
-            
+
             # If more than 2 seconds have passed since the last transcript, send the final transcript
-            if self.transcript_buffer and current_time - self.last_transcript_time >= 3:
+            if self.transcript_buffer and current_time - self.last_transcript_time >= 4:
                 await self.send_final_transcript()
-                self.transcript_buffer = ""  # Reset the buffer after sending the transcript
+                self.transcript_buffer = (
+                    ""  # Reset the buffer after sending the transcript
+                )
+            elif self.transcript_buffer and current_time - self.last_transcript_time >= 3:
+                response_data = {
+                    "transcript": 'processing...',
+                    "groq_response": '...got it',
+                    "accuracy": None,  # We are not tracking accuracy for multiple transcripts
+                    "latency": None,
+                }
+                response_json = json.dumps(response_data)
+                await self.send(response_json)  # Send the final response over WebSocket
+            elif self.transcript_buffer and current_time - self.last_transcript_time >= 2:
+                response_data = {
+                    "transcript": 'listening...',
+                    "groq_response": '...uh um',
+                    "accuracy": None,  # We are not tracking accuracy for multiple transcripts
+                    "latency": None,
+                }
+                response_json = json.dumps(response_data)
+                await self.send(response_json)  # Send the final response over WebSocket
 
     async def send_final_transcript(self):
         """Send the final concatenated transcript to Groq after a 2-second pause."""
@@ -48,7 +72,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             return
 
         # Prepare the system prompt using the previous chat history
-        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible. Initiate the conversation first. Don't ask more than 1 question at a time. Don't make many assumptions. Read previous chats and respond accordingly. Let the user speak if their words are not completed according to the previous chats. You must add '...' symbol every 5 to 10 words at natural pauses where your response can be split for text to speech.\n\n\nPREVIOUS CHATS:\n{json.dumps(self.previous_chats, indent=2)}\n\n"
+        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible. Initiate the conversation first. Don't ask more than 1 question at a time. Don't make many assumptions. Read previous chats and respond accordingly. Let the user speak if their words are not completed according to the previous chats. You must add '...' symbol every 8 to 13 words at natural pauses where your response can be split for text to speech.\n\n\nPREVIOUS CHATS:\n{json.dumps(self.previous_chats, indent=2)}\n\n"
 
         try:
             chat_completion = self.groq_client.chat.completions.create(
@@ -64,10 +88,9 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             groq_response = chat_completion.choices[0].message.content
 
             # Append the current chat to the previous chat history
-            self.previous_chats.append({
-                "user": self.transcript_buffer.strip(),
-                "groq": groq_response
-            })
+            self.previous_chats.append(
+                {"user": self.transcript_buffer.strip(), "groq": groq_response}
+            )
 
             # Prepare response data
             response_data = {
@@ -84,12 +107,14 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
 
     async def save_chat_history(self):
         """Saves the entire chat session when the conversation ends."""
-        user = self.scope['user']
+        user = self.scope["user"]
         if user.is_authenticated:
             # Save the entire conversation as JSON in the database
             await sync_to_async(ChatHistory.objects.create)(
                 user=user,
-                transcript=json.dumps(self.previous_chats)  # Save the full conversation as JSON
+                transcript=json.dumps(
+                    self.previous_chats
+                ),  # Save the full conversation as JSON
             )
         else:
             print("User is not authenticated. Cannot save chat history.")

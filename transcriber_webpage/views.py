@@ -9,6 +9,9 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
+from .models import JournalEntry, ChatHistory
+from groq import Groq
+from django.utils import timezone
 
 load_dotenv()
 # Create your views here.
@@ -31,6 +34,8 @@ def index(request):
     return render(request, 'transcriber_webpage/home.html', context)
 
 
+def all_journal_entries(request):
+    return render(request, 'transcriber_webpage/all_entries.html')
 
 def test(request):
     return HttpResponse("Yeah test is working")
@@ -39,7 +44,56 @@ def get_api_key(request):
     api_key= os.getenv("DEEPGRAM_API_KEY")
     return HttpResponse(api_key)
 
+from django.contrib.auth.decorators import login_required
 
+@login_required  # Ensure the user is logged in
+def create_journal_entry(request):
+    user = request.user
+
+    # Fetch the latest ChatHistory entry for the user
+    latest_chat = ChatHistory.objects.filter(user=user).order_by('-timestamp').first()
+
+    if not latest_chat:
+        return HttpResponse("No chat history found.", status=404)
+    
+    chat_transcript = latest_chat.transcript
+    chat_timestamp = latest_chat.timestamp
+
+    # Prepare the message content to include the transcript and timestamp
+    message_content = f"{chat_transcript}\n Timestamp: {chat_timestamp}"
+
+    # Pass the latest chat transcript to Groq for processing
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    system_prompt= "Your job is to read the chats between an AI and a user and write a journal entry based on the conversation."
+    completion = client.chat.completions.create(
+        model="llama-3.1-70b-versatile",
+        messages=[
+        {
+            "role": "system",
+            "content": "you are the user and you talk with an ai for he questions to talk about your daily life events everyday to write a journal, here is the chat history between you and ai, convert it into a journal of your life based on the answers you gave."
+        },
+        {
+            "role": "user",
+            "content": message_content
+        }
+    ],
+        temperature=1,
+        top_p=1,
+        stream=False,
+        stop=None,
+    )
+
+    groq_response_content = completion.choices[0].message.content  # Extract the Groq response
+
+    # Save the response as a new JournalEntry for the user
+    JournalEntry.objects.create(
+        user=user,
+        groq_response=groq_response_content,
+        timestamp=timezone.now()
+    )
+
+    # Render a "Thank you" HTML page
+    return render(request, 'transcriber_webpage/thankyou.html')
 
 
 

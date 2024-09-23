@@ -30,3 +30,11 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"Chat by {self.user.username} on {self.timestamp}"
+
+class JournalEntry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    groq_response = models.TextField()  # Store Groq's response here
+    timestamp = models.DateTimeField(auto_now_add=True)  # When the journal entry was created
+
+    def __str__(self):
+        return f"Journal Entry for {self.user.username} on {self.timestamp}"
