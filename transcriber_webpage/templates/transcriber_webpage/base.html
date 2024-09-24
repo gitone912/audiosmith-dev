@@ -171,6 +171,37 @@
             }
         }
     </style>
+    <style>
+        /* Modal Enhancements: Add gap at top and bottom */
+        #entryModal .bg-white {
+            padding: 20px;
+            margin: 20px; /* Ensure the modal doesn't touch the screen edges */
+            max-height: 90vh; /* Ensure the modal doesn't overflow the screen */
+            overflow-y: auto; /* Allow scrolling if content exceeds modal height */
+        }
+    
+        /* Enhanced Modal Text for Mobile */
+        @media (max-width: 640px) {
+            .journal-entry {
+                font-size: 0.875rem; /* Smaller text on mobile (14px) */
+            }
+            .bg-white {
+                padding: 16px;
+                margin: 10px; /* Smaller margin for mobile */
+            }
+            button {
+                font-size: 0.875rem; /* Adjust button font size on mobile */
+                padding: 10px 14px; /* Adjust padding for buttons on smaller screens */
+            }
+        }
+    
+        /* Enhanced general padding and spacing */
+        .rounded-lg {
+            padding: 20px;
+            margin: 20px;
+        }
+    </style>
+    
     
 </head>
 <body class="bg-gray-50 font-sans">
