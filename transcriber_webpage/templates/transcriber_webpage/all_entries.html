@@ -2,38 +2,35 @@
 {% block content %}
 <!-- Modal Structure -->
 <div id="entryModal" class="fixed inset-0 hidden z-50 overflow-auto bg-smoke-dark flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg max-w-lg w-full">
-        <div id="entryContent" class="journal-entry text-gray-700 mb-4">
+    <div class="bg-white p-8 rounded-lg max-w-lg w-full transform transition-all duration-300 ease-out">
+        <div id="entryContent" class="journal-entry text-gray-700 mb-6">
             <!-- Journal content will be inserted here -->
         </div>
-        <div class="flex justify-between">
-            <button onclick="closeModal()"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Close</button>
-            <button id="editButton"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</button>
+        <div class="flex justify-between space-x-4">
+            <button onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded">Close</button>
+            <button id="editButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">Edit</button>
         </div>
     </div>
 </div>
 
 <!-- Print it as book button -->
-<button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8"
+<button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8 transition-all duration-300"
     onclick="askpermission()">
     Print it as book
 </button>
 
-<!-- Here is the card grid layout -->
-<!-- Inside your card grid -->
-<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+<!-- Improved Card Layout -->
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-4">
     <!-- Loop over journal entries from context -->
     {% for entry in journal_entries %}
-    <div class="card p-2 m-2 rounded-lg cursor-pointer"
+    <div class="card p-4 rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
         onclick="openEntryModal('{{ entry.id }}', '{{ entry.groq_response|escapejs }}')">
         <p class="text-gray-600 text-xs leading-relaxed journal-entry">
             {{ entry.groq_response|truncatechars:200 }} <!-- Show a preview, truncate to 100 characters -->
         </p>
-        <p class="text-xs text-gray-500">{{ entry.timestamp|date:"F d, Y H:i" }}</p>
+        <p class="text-xs text-gray-500 mt-2">{{ entry.timestamp|date:"F d, Y H:i" }}</p>
     </div>
-
     {% endfor %}
 </div>
+
 {% endblock content %}
