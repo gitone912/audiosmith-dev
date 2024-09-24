@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <html lang="en">
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'transcriber_webpage/css/style.css' %}">
 
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +12,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
     <script>
-        // Function to toggle sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -23,7 +20,6 @@
             overlay.classList.toggle('hidden');
         }
 
-        // Close sidebar when clicking outside (on the overlay)
         function closeSidebarOnOutsideClick() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -34,35 +30,94 @@
             }
         }
 
-        // Function to toggle profile dropdown
         function toggleDropdown() {
             document.getElementById('profileDropdown').classList.toggle('hidden');
         }
-        function redirectToSave() {
-            window.location.href = "{%url "create_journal_entry"%}"; // Replace with the actual support URL
+
+        function askpermission() {
+            alert('Ask for permission to print it as a book');
+        }
+        function openEntryModal(entryId, entryContent) {
+            // Populate the modal with the selected journal entry's content
+            document.getElementById('entryContent').textContent = entryContent;
+        
+            // Set the edit button's link to redirect to the edit page for that entry
+            document.getElementById('editButton').onclick = function() {
+                window.location.href = `/edit_entry/${entryId}`;  // Adjust URL to match your edit route
+            };
+        
+            // Show the modal
+            document.getElementById('entryModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('entryModal').classList.add('hidden');
         }
         
     </script>
+
+    <style>
+        /* Custom CSS */
+        body {
+            background-color: #f5f5f5; /* Light gray for the body background */
+        }
+
+        .card {
+            background-color: rgb(243, 244, 226); /* The desired page color */
+            box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 160px; /* Reduced width for small screens */
+            height: 260px; /* Fixed height */
+            overflow: hidden; /* Hide overflowing content */
+            margin: 5px; /* Ensure there's spacing between cards */
+        }
+
+        @media (min-width: 640px) {
+            .card {
+                width: 180px; /* Wider cards for tablets */
+                height: 280px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .card {
+                width: 200px; /* Even wider cards for larger screens */
+                height: 300px;
+            }
+        }
+        @media (max-width: 420px) and (min-width: 200px) {
+            .card {
+                width: 130px; /* Shrink cards a bit more for better spacing */
+                height: 250px; /* Adjust the height */
+            }
+    
+            .grid {
+                gap: 8px; /* Increase gap between cards to prevent sticking */
+            }
+        }
+    
+        .journal-entry {
+            white-space: pre-line; /* Allows text to wrap and respect newlines */
+        }
+
+        .journal-entry {
+            white-space: pre-line; /* Allows text to wrap and respect newlines */
+        }
+    </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    
-    <!-- Toggle Button for Sidebar (only visible on mobile and small screens) -->
+
     <button onclick="toggleSidebar()" class="p-3 bg-white-600 text-gray fixed top-4 left-4 z-50 lg:hidden">
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Overlay to detect clicks outside of the sidebar -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden" onclick="closeSidebarOnOutsideClick()"></div>
 
-    <!-- Sidebar and Main Container -->
     <div class="flex h-screen overflow-hidden">
 
-        <!-- Sidebar -->
         <aside id="sidebar" class="w-72 bg-white h-full p-5 shadow-md transform -translate-x-full lg:translate-x-0 transition-transform duration-300 fixed lg:static z-40 lg:flex-shrink-0 lg:block hidden">
-            <!-- Profile Section -->
             <div class="flex items-center justify-between mb-10">
                 <div class="flex items-center space-x-2">
-                    <!-- Profile Icon -->
                     <div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
                         A
                     </div>
@@ -74,12 +129,11 @@
                     </svg>
                 </button>
 
-                <!-- Profile Dropdown -->
                 <div id="profileDropdown" class="absolute top-16 right-0 w-64 bg-white rounded-md shadow-lg p-4 hidden">
                     <div class="text-sm text-gray-600 mb-3">{{ email }}</div>
                     <div class="flex items-center mb-4">
                         <div class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
-                            {{ username|slice:":1" }}  <!-- First letter of the username -->
+                            {{ username|slice:":1" }}  
                         </div>
                         <div class="ml-3">
                             <div class="font-semibold">{{ username }}</div> 
@@ -107,17 +161,16 @@
                 </div>
             </div>
 
-            <!-- Sidebar Navigation -->
             <nav>
                 <ul class="space-y-4 text-lg">
                     <li>
-                        <a href="{%url "new_entry" %}" class="flex items-center justify-between bg-gray-200 text-gray-700 font-small rounded-md px-4">
+                        <a href="{%url "new_entry" %}" class="flex items-center justify-between text-gray-700 font-small rounded-md hover:bg-gray-200 px-4">
                             <span><i class="fas fa-book text-sm mr-2"></i>New Entry</span>
                             <span class="text-sm text-gray-500">+</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{%url "all_entries" %}" class="flex items-center justify-between text-gray-700 font-small rounded-md hover:bg-gray-200 px-4">
+                        <a href="{%url "all_entries" %}" class="flex items-center justify-between bg-gray-200 text-gray-700 font-small rounded-md px-4">
                             <span><i class="fas fa-book text-sm mr-2"></i>All Journal Entries</span>
                             <span class="text-sm text-gray-500">></span>
                         </a>
@@ -127,53 +180,11 @@
         </aside>
 
         <!-- Main content -->
-        <main class="flex-grow p-8 flex flex-col items-center">
-            <!-- Status -->
-            <div class="bg-white-100 border border-black-400 text-black-700 px-4 py-3 rounded-lg shadow-md flex items-center space-x-2 mb-8" role="alert" id="status">
-                <span>Click the Mic Icon to Start ..</span>
-            </div>
-            
-    
-            <!-- Microphone Icon inside Yellow Circle (aligned towards the top) -->
-            <div class="sound-wave-container">
-                <div class="yellow-circle w-20 h-20 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-microphone fa-2x" id="mic-icon" onclick="toggleConnection()"></i>
-                </div>
-                <div class="sound-wave">
-                    {% for i in ""|center:40 %}
-                      <div class="bar"></div>
-                    {% endfor %}
-                  </div>
-                  
-            </div>
-            <!-- Disconnected button (initially hidden) -->
-<button id="disconnectedButton" class="fixed top-4 right-4 bg-green-500 text-white font-bold py-2 px-4 rounded-full hidden" onclick="redirectToSave()">
-    Save Entry
-</button>
+        <main class="flex-grow p-8 flex flex-col items-center space-y-4">
+            {% block content %}{% endblock %}
 
-            <!-- Increased space between mic icon and the button -->
-            <!-- Single Button -->
-            <div class="text-center">
-                <button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8" onclick="askpermission()">
-                    Dialogue with AI
-                </button>
-                
-                <p id="buttonsup" class="mt-2 text-gray-600 text-sm">Click to connect</p>
-            </div>
-            
-    
-            <div class="text-center space-y-4 mt-12 p-10">
-                <!-- Container for new chats -->
-                <div id="chat-container">
-                    <!-- New chats will be dynamically inserted here -->
-                </div>
-            </div>
         </main>
     </div>
     {% load static %}
-    <script>
-        const initialGreeting = "{{ greeting }}";  // Pass greeting from Django context to JS
-    </script>
-    <script type="text/javascript" src="{% static 'transcriber_webpage/javascript/script.js' %}"></script>
 </body>
 </html>

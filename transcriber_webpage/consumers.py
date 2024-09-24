@@ -42,12 +42,12 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             current_time = time.time()
 
             # If more than 2 seconds have passed since the last transcript, send the final transcript
-            if self.transcript_buffer and current_time - self.last_transcript_time >= 4:
+            if self.transcript_buffer and current_time - self.last_transcript_time >= 3.5:
                 await self.send_final_transcript()
                 self.transcript_buffer = (
                     ""  # Reset the buffer after sending the transcript
                 )
-            elif self.transcript_buffer and current_time - self.last_transcript_time >= 3:
+            elif self.transcript_buffer and current_time - self.last_transcript_time >= 2.5:
                 response_data = {
                     "transcript": 'processing...',
                     "groq_response": '...got it',
@@ -59,7 +59,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             elif self.transcript_buffer and current_time - self.last_transcript_time >= 2:
                 response_data = {
                     "transcript": 'listening...',
-                    "groq_response": '...uh um',
+                    "groq_response": '...okayy',
                     "accuracy": None,  # We are not tracking accuracy for multiple transcripts
                     "latency": None,
                 }

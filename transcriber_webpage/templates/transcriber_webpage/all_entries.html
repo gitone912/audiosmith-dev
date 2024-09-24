@@ -1,234 +1,39 @@
-<!DOCTYPE html>
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-<html lang="en">
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'transcriber_webpage/css/style.css' %}">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diary Entry</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('hidden');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        function closeSidebarOnOutsideClick() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            if (!sidebar.classList.contains('hidden')) {
-                sidebar.classList.add('hidden');
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            }
-        }
-
-        function toggleDropdown() {
-            document.getElementById('profileDropdown').classList.toggle('hidden');
-        }
-
-        function askpermission() {
-            alert('Ask for permission to print it as a book');
-        }
-    </script>
-
-    <style>
-        /* Custom CSS */
-        body {
-            background-color: #f5f5f5; /* Light gray for the body background */
-        }
-
-        .card {
-            background-color: rgb(243, 244, 226); /* The desired page color */
-            box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            width: 160px; /* Reduced width for small screens */
-            height: 260px; /* Fixed height */
-            overflow: hidden; /* Hide overflowing content */
-            margin: 5px; /* Ensure there's spacing between cards */
-        }
-
-        @media (min-width: 640px) {
-            .card {
-                width: 180px; /* Wider cards for tablets */
-                height: 280px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .card {
-                width: 200px; /* Even wider cards for larger screens */
-                height: 300px;
-            }
-        }
-        @media (max-width: 420px) and (min-width: 200px) {
-            .card {
-                width: 130px; /* Shrink cards a bit more for better spacing */
-                height: 250px; /* Adjust the height */
-            }
-    
-            .grid {
-                gap: 8px; /* Increase gap between cards to prevent sticking */
-            }
-        }
-    
-        .journal-entry {
-            white-space: pre-line; /* Allows text to wrap and respect newlines */
-        }
-
-        .journal-entry {
-            white-space: pre-line; /* Allows text to wrap and respect newlines */
-        }
-    </style>
-</head>
-<body class="bg-gray-50 font-sans">
-
-    <button onclick="toggleSidebar()" class="p-3 bg-white-600 text-gray fixed top-4 left-4 z-50 lg:hidden">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden" onclick="closeSidebarOnOutsideClick()"></div>
-
-    <div class="flex h-screen overflow-hidden">
-
-        <aside id="sidebar" class="w-72 bg-white h-full p-5 shadow-md transform -translate-x-full lg:translate-x-0 transition-transform duration-300 fixed lg:static z-40 lg:flex-shrink-0 lg:block hidden">
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
-                        A
-                    </div>
-                    <div class="text-lg font-semibold">{{ username }}</div> 
-                </div>
-                <button onclick="toggleDropdown()" class="focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                </button>
-
-                <div id="profileDropdown" class="absolute top-16 right-0 w-64 bg-white rounded-md shadow-lg p-4 hidden">
-                    <div class="text-sm text-gray-600 mb-3">{{ email }}</div>
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold">
-                            {{ username|slice:":1" }}  
-                        </div>
-                        <div class="ml-3">
-                            <div class="font-semibold">{{ username }}</div> 
-                        </div>
-                    </div>
-                    <ul class="space-y-2">
-                        <li>
-                            <a href="{%url "users-profile" %}" class="flex items-center space-x-2 text-gray-700 hover:text-black">
-                                <span class="w-5 h-5 inline-block">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                                <span>Profile</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url "logout" %}" class="flex items-center space-x-2 text-gray-700 hover:text-black">
-                                <span class="w-5 h-5 inline-block">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </span>
-                                <span>Log out</span>
-                            </a>
-                        </li>
-                    </ul>
-                    
-                </div>
-            </div>
-
-            <nav>
-                <ul class="space-y-4 text-lg">
-                    <li>
-                        <a href="#" class="flex items-center justify-between bg-gray-200 text-gray-700 font-small rounded-md px-4">
-                            <span><i class="fas fa-book text-sm mr-2"></i>New Entry</span>
-                            <span class="text-sm text-gray-500">+</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-between text-gray-700 font-small rounded-md hover:bg-gray-200 px-4">
-                            <span><i class="fas fa-book text-sm mr-2"></i>All Journal Entries</span>
-                            <span class="text-sm text-gray-500">></span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main content -->
-        <main class="flex-grow p-8 flex flex-col items-center space-y-4">
-            <!-- Print it as book button -->
-            <button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8" onclick="askpermission()">
-                Print it as book
-            </button>
-
-            <!-- Here is the card grid layout -->
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
-                <!-- Cards -->
-                <!-- Page 1 -->
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry"> <!-- Text size adjusted to 'text-xs' -->
-                        Today felt like a well-choreographed dance, with each step revealing a new aspect of my day. The morning kicked off with a series of meetings, where I got to chat with my coworkers about various projects. It was refreshing to bounce ideas off each other and feel the camaraderie of teamwork.
-                    </p>
-                </div>
-
-                <!-- Page 2 -->
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        As the day went on, my inbox filled up with emails and messages, keeping me busy with communication tasks. It was a bit overwhelming at times, but I appreciated the chance to stay connected with my team and keep things moving forward.
-                    </p>
-                </div>
-
-                <!-- Page 3 -->
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        In the afternoon, I focused on putting together a presentation for an upcoming project. It took some time to get everything just right, but I'm happy with how it turned out. Presenting in front of a group always makes me a little nervous, but I think I did okay.
-                    </p>
-                </div>
-
-                <!-- Page 4 -->
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-                <div class="card p-2 m-2 rounded-lg">
-                    <p class="text-gray-600 text-xs leading-relaxed journal-entry">
-                        Now that the day is winding down, I'm taking a moment to reflect on everything that happened. Despite the busyness, there were moments of calm and clarity that I'm grateful for. 
-                    </p>
-                </div>
-                <!-- Add more pages as needed -->
-            </div>
-        </main>
+{% extends "transcriber_webpage/base.html" %}
+{% block content %}
+<!-- Modal Structure -->
+<div id="entryModal" class="fixed inset-0 hidden z-50 overflow-auto bg-smoke-dark flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg max-w-lg w-full">
+        <div id="entryContent" class="journal-entry text-gray-700 mb-4">
+            <!-- Journal content will be inserted here -->
+        </div>
+        <div class="flex justify-between">
+            <button onclick="closeModal()"
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Close</button>
+            <button id="editButton"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</button>
+        </div>
     </div>
-    {% load static %}
-</body>
-</html>
+</div>
+
+<!-- Print it as book button -->
+<button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8"
+    onclick="askpermission()">
+    Print it as book
+</button>
+
+<!-- Here is the card grid layout -->
+<!-- Inside your card grid -->
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+    <!-- Loop over journal entries from context -->
+    {% for entry in journal_entries %}
+    <div class="card p-2 m-2 rounded-lg cursor-pointer"
+        onclick="openEntryModal('{{ entry.id }}', '{{ entry.groq_response|escapejs }}')">
+        <p class="text-gray-600 text-xs leading-relaxed journal-entry">
+            {{ entry.groq_response|truncatechars:200 }} <!-- Show a preview, truncate to 100 characters -->
+        </p>
+        <p class="text-xs text-gray-500">{{ entry.timestamp|date:"F d, Y H:i" }}</p>
+    </div>
+
+    {% endfor %}
+</div>
+{% endblock content %}

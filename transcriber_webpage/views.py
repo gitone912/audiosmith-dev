@@ -1,7 +1,7 @@
 import os
 from django.shortcuts import render,HttpResponse
 from dotenv import load_dotenv
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
 from django.contrib import messages
@@ -34,8 +34,28 @@ def index(request):
     return render(request, 'transcriber_webpage/home.html', context)
 
 
+from django.shortcuts import render
+from .models import JournalEntry
+
 def all_journal_entries(request):
-    return render(request, 'transcriber_webpage/all_entries.html')
+    if request.user.is_authenticated:
+        username = request.user.username
+        email = request.user.email if request.user.email else "No Email"
+        # Fetch the journal entries for the authenticated user, ordered by newest first
+        journal_entries = JournalEntry.objects.filter(user=request.user).order_by('-timestamp')
+    else:
+        username = "Guest"
+        email = "No Email"
+        journal_entries = []  # No entries for guests
+
+    context = {
+        'username': username,
+        'email': email,
+        'journal_entries': journal_entries,  # Add journal entries to context
+    }
+
+    return render(request, 'transcriber_webpage/all_entries.html', context)
+
 
 def test(request):
     return HttpResponse("Yeah test is working")
@@ -46,15 +66,18 @@ def get_api_key(request):
 
 from django.contrib.auth.decorators import login_required
 
-@login_required  # Ensure the user is logged in
 def create_journal_entry(request):
-    user = request.user
+    if request.user.is_authenticated:
+        user = request.user
+    else:
+        return HttpResponse("User not authenticated please login", status=401)
+    
 
     # Fetch the latest ChatHistory entry for the user
     latest_chat = ChatHistory.objects.filter(user=user).order_by('-timestamp').first()
 
     if not latest_chat:
-        return HttpResponse("No chat history found.", status=404)
+        return HttpResponse("No chat history found. please record on first", status=404)
     
     chat_transcript = latest_chat.transcript
     chat_timestamp = latest_chat.timestamp
@@ -64,13 +87,12 @@ def create_journal_entry(request):
 
     # Pass the latest chat transcript to Groq for processing
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    system_prompt= "Your job is to read the chats between an AI and a user and write a journal entry based on the conversation."
     completion = client.chat.completions.create(
         model="llama-3.1-70b-versatile",
         messages=[
         {
             "role": "system",
-            "content": "you are the user and you talk with an ai for he questions to talk about your daily life events everyday to write a journal, here is the chat history between you and ai, convert it into a journal of your life based on the answers you gave."
+            "content": "you are the user and you talk with an ai for he questions to talk about your daily life events everyday to write a journal, here is the chat history between you and ai, convert it into a journal of your life based on the answers you gave. do not mention you talked to an ai. write your journal like you are writing it based on whatever you said in conversation"
         },
         {
             "role": "user",
@@ -94,6 +116,20 @@ def create_journal_entry(request):
 
     # Render a "Thank you" HTML page
     return render(request, 'transcriber_webpage/thankyou.html')
+
+
+
+@login_required
+def edit_journal_entry(request, entry_id):
+    journal_entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+
+    if request.method == 'POST':
+        new_content = request.POST.get('journal_content', '')
+        journal_entry.groq_response = new_content
+        journal_entry.save()
+        return redirect('all_entries')  # Redirect to the page listing all entries after saving
+
+    return render(request, 'transcriber_webpage/edit_entry.html', {'journal_entry': journal_entry})
 
 
 

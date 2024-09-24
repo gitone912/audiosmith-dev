@@ -4,6 +4,9 @@ let isConnected = false; // New flag to track the connection status
 let currentAudio = null; // Track the currently playing audio
 
 let bars; // Global reference for bars to be controlled
+let disconnectTimeout;
+let spokenOnce = false;
+
 // `${Math.random() * (0.1 - 0.1) + 0.1}s`;
 // Initialize bars on window load
 window.addEventListener("load", () => {
@@ -152,9 +155,12 @@ const askpermission = () => {
             document.querySelector("#status").textContent = "Connecting...";
             isConnected = true;
             updateMicIcon();
-        
+            clearTimeout(disconnectTimeout);
+    
+    // Hide the "disconnected" button if it's visible
+    document.getElementById("disconnectedButton").classList.add("hidden");
             // Play the greeting message once the connection is established
-
+            
         
             mediaRecorder.addEventListener("dataavailable", async (event) => {
                 if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
@@ -165,6 +171,7 @@ const askpermission = () => {
                 const greetingAudioUrl = await getDeepgramTTS(initialGreeting);
                 if (greetingAudioUrl) {
                     playAudio(greetingAudioUrl);
+                    spokenOnce = true;
                     document.querySelector("#status").textContent = "Connected!! Click to disconnect";
                     document.querySelector("#buttonsup").textContent = "Connected!! Click to disconnect";
                 }
@@ -198,6 +205,13 @@ const askpermission = () => {
             document.querySelector("#status").textContent = "Disconnected!! Click to connect again";
             isConnected = false;
             updateMicIcon();
+            disconnectTimeout = setTimeout(() => {
+                if (spokenOnce) {
+                    document.getElementById("disconnectedButton").classList.remove("hidden");
+                }
+            }, 50);
+            
+            
         };
 
         socket.onerror = (error) => {
