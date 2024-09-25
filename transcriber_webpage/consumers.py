@@ -125,7 +125,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             self.start_time = time.time()
             connection_start = time.time()
             self.socket = await self.dg_client.transcription.live(
-                {"punctuate": True, "interim_results": False}
+                {"punctuate": True, "interim_results": False,"model":"nova-2"}
             )
             connection_end = time.time()
             connection_time = connection_end - connection_start

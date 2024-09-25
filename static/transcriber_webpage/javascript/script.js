@@ -171,7 +171,7 @@ const askpermission = () => {
                 const greetingAudioUrl = await getDeepgramTTS(initialGreeting);
                 if (greetingAudioUrl) {
                     playAudio(greetingAudioUrl);
-                    spokenOnce = true;
+
                     document.querySelector("#status").textContent = "Connected!! Click to disconnect";
                     document.querySelector("#buttonsup").textContent = "Connected!! Click to disconnect";
                 }
@@ -194,6 +194,7 @@ const askpermission = () => {
                     if (audioUrl) {
                         playAudio(audioUrl);
                         updateChat(transcript, groqResponse);
+                        spokenOnce = true;
                     }
                 }
             } catch (error) {

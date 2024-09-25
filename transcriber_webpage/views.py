@@ -16,6 +16,12 @@ from django.utils import timezone
 load_dotenv()
 # Create your views here.
 
+def redirect_home(request):
+    if request.user.is_authenticated:
+        return redirect("/record")
+    else:
+        return redirect("/login")
+
 
 def index(request):
     if request.user.is_authenticated:

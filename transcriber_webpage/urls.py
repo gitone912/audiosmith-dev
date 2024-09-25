@@ -7,7 +7,7 @@ from .views import RegisterView, home , profile
 
 
 urlpatterns = [
-    path("", views.index, name="new_entry"),
+    path("record/", views.index, name="new_entry"),
     path('all_entries', views.all_journal_entries, name='all_entries'),
     path("test", views.test, name="test"),
     path("api_key",views.get_api_key,name='apikey'),
@@ -15,7 +15,8 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='users-register'),
     path('profile/', profile, name='users-profile'),
     path('create_journal_entry', views.create_journal_entry, name='create_journal_entry'),
-     path('edit_entry/<int:entry_id>/', views.edit_journal_entry, name='edit_entry'),
+    path('edit_entry/<int:entry_id>/', views.edit_journal_entry, name='edit_entry'),
+    path('', views.redirect_home, name="redirect")
 
 ]
 
