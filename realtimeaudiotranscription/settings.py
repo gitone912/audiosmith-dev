@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-caj!h^mg=1-n!m+@txd@c4u8a=3tczvalr2dg3h9crdus)668(
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['8ec3-14-139-54-194.ngrok-free.app','.vercel.app', '.now.sh','localhost','127.0.0.1',os.getenv("ngrok-url")]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
