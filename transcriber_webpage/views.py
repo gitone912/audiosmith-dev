@@ -34,7 +34,7 @@ def index(request):
 from django.shortcuts import render
 from .models import JournalEntry
 
-
+@login_required
 def all_journal_entries(request):
     if request.user.is_authenticated:
         username = request.user.username
@@ -73,13 +73,13 @@ def create_journal_entry(request):
     if request.user.is_authenticated:
         user = request.user
     else:
-        return HttpResponse("User not authenticated please login", status=401)
+        return render(request, "transcriber_webpage/error404.html")
 
     # Fetch the latest ChatHistory entry for the user
     latest_chat = ChatHistory.objects.filter(user=user).order_by("-timestamp").first()
 
     if not latest_chat:
-        return HttpResponse("No chat history found. please record on first", status=404)
+        return render(request, "transcriber_webpage/error404.html")
 
     chat_transcript = latest_chat.transcript
     chat_timestamp = latest_chat.timestamp
@@ -212,6 +212,8 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 @login_required
 def profile(request):
+    username = request.user.username
+    email = request.user.email if request.user.email else "No Email"
     if request.method == "POST":
         user_form = UpdateUserForm(request.POST, instance=request.user)
         profile_form = UpdateProfileForm(
@@ -229,6 +231,6 @@ def profile(request):
 
     return render(
         request,
-        "users/profile.html",
-        {"user_form": user_form, "profile_form": profile_form},
+        "transcriber_webpage/profile.html",
+        {"username": username, "email": email,"user_form": user_form, "profile_form": profile_form},
     )
