@@ -1,6 +1,4 @@
-
-
-# Audiosmith Django Project
+# Audiosmith
 
 This project is built using Django. Follow the steps below to set up the project in a virtual environment and run the server.
 
@@ -19,7 +17,6 @@ Make sure you have the following installed:
 git clone <repository-url>
 cd <repository-directory>
 ```
-
 
 2. Create a virtual environment
 
@@ -98,12 +95,3 @@ deactivate
   ```bash
   python manage.py migrate
   ```
-
----
-
-Feel free to modify this README file as your project evolves.
-
-```
-
-This will guide users through setting up and running your Django project in a virtual environment. Make sure to replace the `<repository-url>` placeholder with the actual URL to clone the repository.
-```
