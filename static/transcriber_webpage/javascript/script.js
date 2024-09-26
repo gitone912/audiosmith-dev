@@ -157,8 +157,7 @@ const askpermission = () => {
             updateMicIcon();
             clearTimeout(disconnectTimeout);
     
-    // Hide the "disconnected" button if it's visible
-    document.getElementById("disconnectedButton").classList.add("hidden");
+  
             // Play the greeting message once the connection is established
             
         
@@ -172,8 +171,7 @@ const askpermission = () => {
                 if (greetingAudioUrl) {
                     playAudio(greetingAudioUrl);
 
-                    document.querySelector("#status").textContent = "Connected!! Click to disconnect";
-                    document.querySelector("#buttonsup").textContent = "Connected!! Click to disconnect";
+                    document.querySelector("#status").textContent = "Click to stop and generate entry";
                 }
             }
         
@@ -208,7 +206,9 @@ const askpermission = () => {
             updateMicIcon();
             disconnectTimeout = setTimeout(() => {
                 if (spokenOnce) {
-                    document.getElementById("disconnectedButton").classList.remove("hidden");
+                    redirectToSave();
+                } else {
+                    alert("Your entry is empty");
                 }
             }, 50);
             
@@ -239,7 +239,6 @@ const closeConnection = () => {
     }
 
     document.querySelector("#status").textContent = "Disconnected!! Click to connect again";
-    document.querySelector("#buttonsup").textContent = "Click to connect";
     isConnected = false;
     updateMicIcon();
 };

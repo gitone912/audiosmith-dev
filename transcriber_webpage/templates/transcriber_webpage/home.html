@@ -40,6 +40,7 @@
         }
         function redirectToSave() {
             window.location.href = "{%url "create_journal_entry"%}"; // Replace with the actual support URL
+            
         }
         
     </script>
@@ -128,7 +129,7 @@
                     </li>
                     <li>
                         <a href="{%url "all_entries" %}" class="flex items-center justify-between text-gray-700 font-small rounded-md hover:bg-gray-200 px-4">
-                            <span><i class="fas fa-book text-sm mr-2"></i>All Journal Entries</span>
+                            <span><i class="fas fa-book text-sm mr-2"></i>Journal Records</span>
                             <span class="text-sm text-gray-500">></span>
                         </a>
                     </li>
@@ -157,9 +158,6 @@
                   
             </div>
             <!-- Disconnected button (initially hidden) -->
-<button id="disconnectedButton" class="fixed top-4 right-4 bg-green-500 text-white font-bold py-2 px-4 rounded-full hidden" onclick="redirectToSave()">
-    Save Entry
-</button>
 
             <!-- Increased space between mic icon and the button -->
             <!-- Single Button -->
@@ -167,8 +165,6 @@
                 <button class="bg-[rgb(209,179,100)] hover:bg-[rgb(189,159,80)] text-white font-bold py-2 px-8 rounded-full mt-8" onclick="askpermission()">
                     Dialogue with AI
                 </button>
-                
-                <p id="buttonsup" class="mt-2 text-gray-600 text-sm">Click to connect</p>
             </div>
             
     

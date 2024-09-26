@@ -145,6 +145,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         """WebSocket connection established."""
+        self.previous_chats = []
         await self.connect_to_deepgram()
         await self.accept()
         # Start a background task to check for transcripts every 2 seconds
@@ -154,6 +155,8 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
         """When WebSocket connection is closed, save the chat history."""
         await self.save_chat_history()
         await self.close()
+       #reset the previous chat after closing
+        self.previous_chats = []
 
     async def receive(self, bytes_data):
         """Send audio data to Deepgram for transcription."""
