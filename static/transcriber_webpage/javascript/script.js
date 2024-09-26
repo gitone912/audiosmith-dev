@@ -62,6 +62,7 @@ function playAudio(audioUrl) {
     }
 
     currentAudio = new Audio(audioUrl);
+    currentAudio.playbackRate = 0.86; // Set playback speed to 85% (15% slower)
     currentAudio.play();
 
     // Start the bar animation when audio starts
@@ -72,6 +73,7 @@ function playAudio(audioUrl) {
         toggleBarAnimation(false); // Stop bar animation when audio ends
     };
 }
+
 // Function to toggle connection and icon
 function toggleConnection() {
     if (isConnected) {

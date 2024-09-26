@@ -42,7 +42,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             current_time = time.time()
 
             # If more than 2 seconds have passed since the last transcript, send the final transcript
-            if self.transcript_buffer and current_time - self.last_transcript_time >= 3.5:
+            if self.transcript_buffer and current_time - self.last_transcript_time >= 3:
                 await self.send_final_transcript()
                 self.transcript_buffer = (
                     ""  # Reset the buffer after sending the transcript
@@ -50,7 +50,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             elif self.transcript_buffer and current_time - self.last_transcript_time >= 2.5:
                 response_data = {
                     "transcript": 'processing...',
-                    "groq_response": '...got it',
+                    "groq_response": '...',
                     "accuracy": None,  # We are not tracking accuracy for multiple transcripts
                     "latency": None,
                 }
@@ -59,7 +59,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             elif self.transcript_buffer and current_time - self.last_transcript_time >= 2:
                 response_data = {
                     "transcript": 'listening...',
-                    "groq_response": '...okayy',
+                    "groq_response": '...',
                     "accuracy": None,  # We are not tracking accuracy for multiple transcripts
                     "latency": None,
                 }
@@ -72,7 +72,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             return
 
         # Prepare the system prompt using the previous chat history
-        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible. Initiate the conversation first. Don't ask more than 1 question at a time. Don't make many assumptions. Read previous chats and respond accordingly. Let the user speak if their words are not completed according to the previous chats. You must add '...' symbol every 8 to 13 words at natural pauses where your response can be split for text to speech.\n\n\nPREVIOUS CHATS:\n{json.dumps(self.previous_chats, indent=2)}\n\n"
+        system_prompt = f"You are Stella a personal journalist covering daily life events of your user. You have a youthful and cheery personality. Keep your responses as brief as possible. Initiate the conversation first. Don't ask more than 1 question at a time. Don't make many assumptions. Read previous chats and respond accordingly. Let the user speak if their words are not completed according to the previous chats. Act as a natural human. you can add '...' symbol for natural pauses where your response can be split for text to speech. you can use some human fillers as well.\nPREVIOUS CHATS:\n{json.dumps(self.previous_chats, indent=2)}\n"
 
         try:
             chat_completion = self.groq_client.chat.completions.create(

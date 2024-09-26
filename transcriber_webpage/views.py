@@ -100,7 +100,7 @@ def create_journal_entry(request):
         messages=[
             {
                 "role": "system",
-                "content": "you are the user and you talk with an ai for he questions to talk about your daily life events everyday to write a journal, here is the chat history between you and ai, convert it into a journal of your life based on the answers you gave. do not mention you talked to an ai. write your journal like you are writing it based on whatever you said in conversation",
+                "content": '''You are the AI in conversation with a user who answers your questions about their daily life, experiences, and thoughts. Your task is to take the responses given by the user during the conversation and convert them into a cohesive, well-written journal entry. The journal should be written from the user's perspective, as if they are writing it themselves.The journal entry should not mention the AI or the conversation itself. Instead, focus on translating the user's answers into a natural narrative that reflects their day, emotions, observations, and reflections. The tone should be personal, introspective, and authentic, as though the user is recording their thoughts for their own private journal.''',
             },
             {"role": "user", "content": message_content},
         ],
