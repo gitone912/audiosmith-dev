@@ -209,6 +209,8 @@ const askpermission = () => {
                     redirectToSave();
                 } else {
                     alert("Your entry is empty");
+                    // reload the window
+                    window.location.reload();
                 }
             }, 50);
             
