@@ -27,11 +27,11 @@ def index(request):
     if request.user.is_authenticated:
         username = request.user.username
         email = request.user.email if request.user.email else "No Email"
-        greeting = f"Hi {username}, welcome to audiosmith. I am Stella, your personal journalist. I am here to cover and write about the daily life events that make you who you are. So are you ready to start?"
+        greeting = f"Hi {username}, welcome to audiosmith. I am Laura, your personal journalist. I am here to cover and write about the daily life events of Yours. So are you ready to start?"
     else:
         username = "Guest"
         email = "No Email"
-        greeting = "Hi, welcome to audiosmith. I am Stella, your personal journalist. I am here to cover and write about the daily life events that make you who you are. So are you ready to start?"
+        greeting = "Hi, welcome to audiosmith. I am Laura, your personal journalist. I am here to cover and write about the daily life events of Yours. So are you ready to start?"
 
     context = {"greeting": greeting, "username": username, "email": email}
     return render(request, "transcriber_webpage/home.html", context)
